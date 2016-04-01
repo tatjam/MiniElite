@@ -53,6 +53,8 @@ int main()
 
 	triangle.offset = sf::Vector3f(0.5f, 0.4f, -2.f);
 
+	triangle.loadFile("res/testObj.obj", "res/testObj.mtl");
+
 	// Start the game loop
 	while (window.isOpen())
 	{
