@@ -42,12 +42,22 @@ int main()
 	float zMov = 0.0f;
 
 	Model triangle = Model();
+	triangle.position.x += 0.01f;
+	triangle.addVertex(0, 0, -2);
+	triangle.addVertex(0, 1, -2);
+	triangle.addVertex(1, 0, -2);
 
-	triangle.vertices.push_back(sf::Vector3f)
+	triangle.addVertex(1, 0, -2);
+	triangle.addVertex(0, 0, -2);
+	triangle.addVertex(1, 1, -2);
+
+	triangle.offset = sf::Vector3f(0.5f, 0.4f, -2.f);
 
 	// Start the game loop
 	while (window.isOpen())
 	{
+
+
 		// Process events
 		sf::Event event;
 		while (window.pollEvent(event))
@@ -58,11 +68,16 @@ int main()
 		}
 
 		//Camera rotation:
-
+		triangle.position.x += 0.0001f;
+		triangle.rotation.y += 0.1f;
+		triangle.rotation.z += 0.01f;
+		triangle.rotation.x += 0.1f;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
 		{
 			xRot -= 0.05f;
 		}
+
+		//Hello!
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
 		{
@@ -130,6 +145,8 @@ int main()
 		texture->clear(sf::Color::Black);
 
 		//GL drawing to texture here
+
+		//Camera translations:
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 
@@ -139,8 +156,15 @@ int main()
 		glRotatef(yRot, 0, 1, 0);
 		glRotatef(zRot, 0, 0, 1);
 
-
 		glTranslatef(xMov, yMov, zMov);
+
+		
+
+		//Model drawing
+
+
+		triangle.render();
+
 		//Front face
 
 

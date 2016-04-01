@@ -19,10 +19,10 @@ public:
 	
 	//Do not dare to modify these without use of the helper
 	//functions (Feel free actually)
-	sf::Vector3f location;
-	sf::Vector3f rotation;
-	sf::Vector3f scale;
-	sf::Vector3f offset;
+	sf::Vector3f position = sf::Vector3f(0, 0, 0);
+	sf::Vector3f rotation = sf::Vector3f(0, 0, 0);
+	sf::Vector3f scale = sf::Vector3f(0, 0, 0);
+	sf::Vector3f offset = sf::Vector3f(0, 0, 0);
 	//Vertex list!
 	//Stored as triplets, to represent glVertex3f
 	std::vector<sf::Vector3f> vertices = std::vector<sf::Vector3f>();
@@ -34,6 +34,22 @@ public:
 
 	void addVertex(float x, float y, float z);
 	void addVertex(sf::Vector3f vertex);
+
+	void move(float x, float y, float z);
+	void rotate(float x, float y, float z);
+
+	void move(sf::Vector3f t);
+	void rotate(sf::Vector3f t);
+
+
+	void setPosition(float x, float y, float z);
+	void setRotation(float x, float y, float z);
+	void setScale(float x, float y, float z);
+
+	void setPosition(sf::Vector3f t);
+	void setRotation(sf::Vector3f t);
+	void setScale(sf::Vector3f t);
+
 
 	Error render();
 
