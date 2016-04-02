@@ -59,18 +59,12 @@ Error Model::render(bool doColor)
 			{
 				glColor3f(colors[i].x, colors[i].y, colors[i].z);
 			}
+			glNormal3f(normals[i].x, normals[i].y, normals[i].z);
 			glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z);
 		}
 		glEnd();
 
 
-		glBegin(GL_POINTS);
-		glColor3f(1.f, 0.f, 0.f);
-		glVertex3f(offset.x, offset.y, offset.z);
-		glEnd();
-
-		glGetFloatv(GL_MODELVIEW_MATRIX, postMatrix);
-		
 
 		//Unload ALL shaders
 		glUseProgram(0);

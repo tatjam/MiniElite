@@ -15,15 +15,31 @@ int main()
 	
 	sf::RenderTexture* texture = new sf::RenderTexture();
 
+
 	texture->create(SIDE, SIDE, true);
 
 	texture->setActive();
+
+	//ENABLING HAS TO GO HERE
+	//-------------------------------------------------
+	glEnable(GL_LIGHTING);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+
+	GLfloat light0Position[] = { 20.0, 80.0, 20.0, 15.0 }; // Position
+	glLightfv(GL_LIGHT0, GL_POSITION, light0Position);
+
+	glEnable(GL_LIGHT0);
+	glShadeModel(GL_FLAT);
+
+	//Sometimes after everything is ready glEnable does nothing
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
 	glViewport(0, 0, SIDE, SIDE);
 	glMatrixMode(GL_PROJECTION);
+
 	glLoadIdentity();
 	gluPerspective(53.0f, 1.f, 0.1f, 100.f);
 	glMatrixMode(GL_MODELVIEW);
@@ -57,14 +73,6 @@ int main()
 	triangle.loadFile("res/testObj.obj", "res/testObj.mtl");
 
 	
-
-
-	sf::Vector3f lightPosition = { 1.5f, 1.5f, 1.5f };
-
-
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-
 	if (glewInit() != GLEW_OK)
 	{
 		std::cout << "GLEW is not willing to work, the program will now quit." << std::endl;
@@ -73,7 +81,8 @@ int main()
 	}
 
 
-	GLShader vertex = GLShader(GL_VERTEX_SHADER);
+
+	/*GLShader vertex = GLShader(GL_VERTEX_SHADER);
 	vertex.loadFromFile("res/shader/testVertex.glsl");
 	vertex.compile();
 
@@ -85,15 +94,15 @@ int main()
 	GLProgram* p = new GLProgram();
 	p->attachShader(vertex);
 	p->attachShader(fragment);
-	p->linkProgram();
+	p->linkProgram();*/
 
-	triangle.shader = p;
+	triangle.shader = nullptr;
 
 
 	// Start the game loop
 	while (window.isOpen())
 	{
-		triangle.doLight(lightPosition, 1.0f, MixMode::ADD);
+		//triangle.doLight(lightPosition, 1.0f, MixMode::ADD);
 
 		// Process events
 		sf::Event event;
@@ -145,38 +154,42 @@ int main()
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
 		{
-			zMov += 0.001f;
+			zMov += 0.005f;
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
 		{
-			zMov -= 0.001f;
+			zMov -= 0.005f;
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
 		{
-			xMov -= 0.001f;
+			xMov -= 0.005f;
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
 		{
-			xMov += 0.001f;
+			xMov += 0.005f;
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R))
 		{
-			yMov -= 0.001f;
+			yMov -= 0.005f;
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F))
 		{
-			yMov += 0.001f;
+			yMov += 0.005f;
 		}
 
 		// Clear screen
 		//window.clear();
 
 		texture->setActive(true);
+
+		//We have to reposition the light each frame, as it "moves with the camera"
+
+		glLightfv(GL_LIGHT0, GL_POSITION, light0Position);
 
 		glClear(GL_DEPTH_BUFFER_BIT); //!!!
 		texture->clear(sf::Color::Black);
@@ -205,9 +218,8 @@ int main()
 		//Front face
 
 
-		/*
+		
 		glBegin(GL_POLYGON);
-			glColor3f(1.0f, 1.0f, 1.0f);
 			glVertex3f(0, 0, -5.f);
 			glVertex3f(1, 0, -5.f);
 			glVertex3f(1, 1, -5.f);
@@ -216,7 +228,6 @@ int main()
 
 		//Back face
 		glBegin(GL_POLYGON);
-			glColor3f(0.2f, 0.2f, 0.2f);
 			glVertex3f(0, 0, -6.f);
 			glVertex3f(1, 0, -6.f);
 			glVertex3f(1, 1, -6.f);
@@ -225,7 +236,6 @@ int main()
 
 		//Left face
 		glBegin(GL_POLYGON);
-			glColor3f(0.7f, 0.7f, 0.7f);
 			glVertex3f(0, 0, -5.f);
 			glVertex3f(0, 0, -6.f);
 			glVertex3f(0, 1, -6.f);
@@ -234,7 +244,6 @@ int main()
 
 		//Right face
 		glBegin(GL_POLYGON);
-			glColor3f(0.2f, 0.2f, 0.2f);
 			glVertex3f(1, 0, -5.f);
 			glVertex3f(1, 0, -6.f);
 			glVertex3f(1, 1, -6.f);
@@ -243,7 +252,6 @@ int main()
 
 		//Top face
 		glBegin(GL_POLYGON);
-			glColor3f(0.8f, 0.8f, 0.8f);
 			glVertex3f(0, 1, -5.f);
 			glVertex3f(1, 1, -5.f);
 			glVertex3f(1, 1, -6.f);
@@ -252,15 +260,12 @@ int main()
 
 		//Bottom face
 		glBegin(GL_POLYGON);
-			glColor3f(0.2f, 0.2f, 0.2f);
 			glVertex3f(0, 0, -5.f);
 			glVertex3f(1, 0, -5.f);
 			glVertex3f(1, 0, -6.f);
 			glVertex3f(0, 0, -6.f);
 		glEnd();
-		*/
-
-		triangle.clearColor();
+		
 
 		window.setActive(true);
 
