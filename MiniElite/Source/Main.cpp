@@ -42,16 +42,16 @@ int main()
 	float zMov = 0.0f;
 
 	Model triangle = Model();
-	triangle.position.x += 0.01f;
+	/*triangle.position.x += 0.01f;
 	triangle.addVertex(0, 0, -2);
 	triangle.addVertex(0, 1, -2);
 	triangle.addVertex(1, 0, -2);
 
 	triangle.addVertex(1, 0, -2);
 	triangle.addVertex(0, 0, -2);
-	triangle.addVertex(1, 1, -2);
+	triangle.addVertex(1, 1, -2);*/
 
-	triangle.offset = sf::Vector3f(0.5f, 0.4f, -2.f);
+	triangle.offset = sf::Vector3f(1.5f, 2.4f, -2.f);
 
 	triangle.loadFile("res/testObj.obj", "res/testObj.mtl");
 
@@ -70,10 +70,10 @@ int main()
 		}
 
 		//Camera rotation:
-		triangle.position.x += 0.0001f;
+		//triangle.position.x += 0.0001f;
 		triangle.rotation.y += 0.1f;
-		triangle.rotation.z += 0.01f;
-		triangle.rotation.x += 0.1f;
+		//triangle.rotation.z += 0.01f;
+		//triangle.rotation.x += 0.1f;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
 		{
 			xRot -= 0.05f;

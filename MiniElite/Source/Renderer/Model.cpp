@@ -162,9 +162,6 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 
 	std::map<std::string, sf::Vector3f> materials = std::map<std::string, sf::Vector3f>();
 
-	std::vector<sf::Vector3f> verticesIndex = std::vector<sf::Vector3f>();
-
-	std::vector<sf::Vector3f> outVertices = std::vector<sf::Vector3f>();
 
 	bool comment = false;
 
@@ -172,8 +169,7 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 	
 	bool colorParsing = false;
 
-	//.obj identifier (v, ...)
-	std::string identifier = "NONE";
+
 
 	bool newMtlIn = false;
 	bool matNameIn = false;
@@ -186,6 +182,8 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 	std::string matNum2 = "";
 	std::string matNum3 = "";
 	std::string matBuffer = "";
+
+	int picPoint = 0;
 
 	//First parse materialss:
 	for (int i = 0; i < mtl.size(); i++)
@@ -390,16 +388,345 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 		}
 	}
 
+	//Now actually parse the .obj file
+	//This is simpler!
 
+
+
+	std::vector<sf::Vector3f> verticesIndex = std::vector<sf::Vector3f>();
+
+	std::vector<sf::Vector3f> outVertices = std::vector<sf::Vector3f>();
+
+	std::vector<sf::Vector3f> outNormals = std::vector<sf::Vector3f>();
+
+	//.obj identifier (v, ...)
+	std::string identifier = "NONE";
+
+	comment = false;
+
+	bool defining = false;
+
+	std::string activeMaterial = "";
+
+	sf::Vector3f vertexBuffer;
+	std::string sBuffer = "";
+
+	int point = 0;
+
+	//The actual A/B/C (starts at 0)
+	int faceIP = 0;
+
+	int faceLength = 0;
+
+	int faceSubP = 0;
 
 	for (int i = 0; i < obj.size(); i++)
 	{
+		std::cout << obj.at(i);
+		if (comment)
+		{
+			std::cout << "IN COMMENT!" << std::endl;
 
+			if (obj.at(i) == '\n')
+			{
+				std::cout << "Ending comment" << std::endl;
+				comment = false;
+				continue;
+			}
+		}
+		else
+		{
+			if (obj.at(i) == '#')
+			{
+				std::cout << "Starting comment!" << std::endl;
+				comment = true;
+				continue;
+			}
+
+			if (!defining)
+			{
+				//Find a new (valid) identifier and start definind
+				if (obj.at(i) == 'v')
+				{
+					if (obj.at(i+1) == 'n')
+					{
+						std::cout << "Starting normal" << std::endl;
+						//New vertex normal
+						//Skip to first number
+						i+=2;
+						defining = true;
+						identifier = "vn";
+						continue;
+					}
+					else
+					{
+						if (obj.at(i + 1) == ' ')
+						{
+							std::cout << "Starting vertex" << std::endl;
+							//New vertex 
+							//Skip to first number
+							i++;
+							defining = true;
+							identifier = "v";
+							continue;
+						}
+					}
+				}
+				else if (obj.at(i) == 'f')
+				{
+					if (obj.at(i + 1) == ' ')
+					{
+						std::cout << "Starting face" << std::endl;
+						//New (complex) face:
+
+						//Skip to first number
+						i++;
+						defining = true;
+						identifier = "f";
+						continue;
+					}
+				}
+				else if (obj.at(i) == 'u')
+				{
+					if (obj.at(i + 1) == 's')
+					{
+						if (obj.at(i + 2) == 'e')
+						{
+							if (obj.at(i + 3) == 'm')
+							{
+								if (obj.at(i + 4) == 't')
+								{
+									if (obj.at(i + 5) == 'l')
+									{
+										materialName = "";
+										//usemtl!
+										std::cout << "Starting mtl" << std::endl;
+										//Skip to material name:
+										i += 6;
+										defining = true;
+										identifier = "usemtl";
+										continue;
+									}
+								}
+
+							}
+						}
+					}
+
+				}
+			}
+			else
+			{
+				if (identifier == "usemtl")
+				{
+					std::cout << "useMtlDoing" << std::endl;
+					//Find activeMaterial, and stop defining
+					//We just need to travel until we find a [\n]
+
+					if (obj.at(i) == '\n')
+					{
+						std::cout << "FINAL NAME: " << materialName << std::endl;
+						defining = false;
+						continue;
+					}
+
+					materialName += obj.at(i);
+					continue;
+				}
+				else if (identifier == "v")
+				{
+					if (obj.at(i) == ' ')
+					{
+						if (point == 0)
+						{
+							vertexBuffer.x = stof(sBuffer);
+						}
+						else if (point == 1)
+						{
+							vertexBuffer.y = stof(sBuffer);
+						}
+
+						sBuffer = "";
+
+						point++;
+						continue;
+					}
+					else if (obj.at(i) == '\n')
+					{
+						vertexBuffer.z = stof(sBuffer);
+
+						outVertices.push_back(vertexBuffer);
+
+						std::cout << "Finished vertex: " << std::endl;
+						std::cout << "X: " << vertexBuffer.x << " Y: " <<
+							vertexBuffer.y << " Z: " << vertexBuffer.z << std::endl;
+						std::cout << "outVertices is now size: " << outVertices.size();
+
+						vertexBuffer = sf::Vector3f();
+						sBuffer = "";
+						point = 0;
+						defining = false;
+						continue;
+					}
+
+					sBuffer += obj.at(i);
+
+					continue;
+
+				}
+				else if (identifier == "vn")
+				{
+					if (obj.at(i) == ' ')
+					{
+						if (point == 0)
+						{
+							vertexBuffer.x = stof(sBuffer);
+						}
+						else if (point == 1)
+						{
+							vertexBuffer.y = stof(sBuffer);
+						}
+
+						sBuffer = "";
+
+						point++;
+						continue;
+					}
+					else if (obj.at(i) == '\n')
+					{
+						vertexBuffer.z = stof(sBuffer);
+
+						outNormals.push_back(vertexBuffer);
+
+						std::cout << "Finished normal: " << std::endl;
+						std::cout << "X: " << vertexBuffer.x << " Y: " <<
+							vertexBuffer.y << " Z: " << vertexBuffer.z << std::endl;
+						std::cout << "outNormals is now size: " << outNormals.size();
+
+						vertexBuffer = sf::Vector3f();
+						sBuffer = "";
+						point = 0;
+						defining = false;
+						continue;
+					}
+
+					sBuffer += obj.at(i);
+
+					continue;
+				}
+				else if (identifier == "f")
+				{
+					std::cout << "VERTEX SIZE: " << outVertices.size() << std::endl;
+					std::cout << "NORMAL SIZE: " << outNormals.size() << std::endl;
+					std::cout << "DOING FACE!" << std::endl;
+
+					if (obj.at(i) == ' ')
+					{
+						std::cout << "Doing normal of either first or second triplet!" << std::endl;
+						//Finish one of the triplets
+						//and push the data
+
+						//normal (faceIP = 2)
+
+						std::cout << "Inserting normal, normal ID: " << std::stoi(sBuffer) - 1 << std::endl;
+
+						normals.push_back(outNormals[std::stoi(sBuffer) - 1]);
+
+
+						faceIP = 0;
+						//i++;
+						sBuffer = "";
+						continue;
+					}
+
+					if (obj.at(i) == '\n')
+					{
+						std::cout << "Finishing face group!" << std::endl;
+						//normal (faceIP = 2)
+						//Do last triplet and flush
+
+						normals.push_back(outNormals[std::stoi(sBuffer) - 1]);
+
+						defining = false;
+						identifier = "";
+
+						faceIP = 0;
+						sBuffer = "";
+
+						//Push the color three times to make all
+						//added vertices the mtlcolor used!
+
+						colors.push_back(materials[activeMaterial]);
+
+						continue;
+
+					}
+
+					if (obj.at(i) == '/')
+					{
+
+						std::cout << "Doing vertex or UV!" << std::endl;
+						if (sBuffer == "")
+						{
+							sBuffer = "1";
+						}
+
+
+						if (faceIP == 0)
+						{
+							std::cout << "Inserting vertex, vertex ID: " << std::stoi(sBuffer) - 1 << std::endl;
+							if (std::stoi(sBuffer) - 1 >= outVertices.size())
+							{
+								std::cout << std::stoi(sBuffer) - 1 << " is >= " << outVertices.size()
+									<< std::endl;
+								continue;
+							}
+							vertices.push_back(outVertices[std::stoi(sBuffer) - 1]);
+
+							std::cout << "Inserted vertex: " << std::endl;
+							std::cout << "X: " << outVertices[std::stoi(sBuffer) - 1].x <<
+								" Y: " << outVertices[std::stoi(sBuffer) - 1].y << " Z: " <<
+								outVertices[std::stoi(sBuffer) - 1].z << std::endl;
+
+							//vertex
+						}
+						else if (faceIP == 1)
+						{
+							std::cout << "UV DOING NOTHING!" << std::endl;
+							//Uvs do nothing for now
+							//uv
+						}
+
+						std::cout << "Done!" << std::endl;
+						sBuffer = "";
+						faceIP++;
+						continue;
+
+					}
+					std::cout << "BEFORE sBuffer: " << sBuffer << std::endl;
+
+
+					sBuffer += obj.at(i);
+
+					std::cout << "AFTER sBuffer: " << sBuffer << std::endl;
+
+					continue;
+
+				}
+			}
+
+
+		}
 	}
 
 
-}
 
+	std::cout << "--------------------------------------" << std::endl;
+	std::cout << " File: " << objPath << " was loaded!" << std::endl;
+	std::cout << "--------------------------------------" << std::endl;
+
+
+}
 
 
 Model::Model()

@@ -38,9 +38,14 @@ public:
 	//Lighting calculations will not work if this is not filled
 	//(Filled automagically by the .obj loader)
 
-	//Color list!
+	std::vector<sf::Vector3f> normals = std::vector<sf::Vector3f>();
+
+	//Color list! (Used when generating lighting)
 	//Stored as triplets, to represent glColor3f
 	std::vector<sf::Vector3f> colors = std::vector<sf::Vector3f>();
+
+	//Colors used in the render
+	std::vector<sf::Vector3f> rColors = std::vector<sf::Vector3f>();
 
 
 	void addVertex(float x, float y, float z);
