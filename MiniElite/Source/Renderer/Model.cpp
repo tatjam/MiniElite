@@ -1,6 +1,9 @@
 #include "Model.h"
 #include <iostream>
 
+
+#define DISABLE_COUT true
+
 Error Model::render()
 {
 	bool doColor = true;
@@ -133,6 +136,12 @@ void Model::setScale(sf::Vector3f t)
 
 Error Model::loadFile(std::string objPath, std::string mtlPath)
 {
+
+	if (DISABLE_COUT)
+	{
+		std::cout.setstate(std::ios_base::failbit);
+	}
+
 	std::ifstream t(objPath);
 	if (!t.good())
 	{
@@ -729,6 +738,11 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 	std::cout << " File: " << objPath << " was loaded!" << std::endl;
 	std::cout << "--------------------------------------" << std::endl;
 
+
+	if (DISABLE_COUT)
+	{
+		std::cout.setstate(std::ios_base::goodbit);
+	}
 
 }
 
