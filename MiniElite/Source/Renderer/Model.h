@@ -14,6 +14,7 @@ enum Error
 	NO_VERTICES,         //When no vertices are stored
 	VERTICES_NO_TRIPLET, //When vertices % 3 != 0
 	COLORS_NO_TRIPLET,   //When color % 3 != 0
+	NOT_ENOUGH_COLORS,   //When there is not a color for each vertex
 	FILE_NOT_FOUND,	     //When a specified file does not exists
 	FILE_INCORRECT,		 //When a specified file is corrupt/incorrect
 	FATAL_ERROR,		 //Error when using std:: or similar

@@ -25,6 +25,11 @@ Error Model::render()
 			return Error::COLORS_NO_TRIPLET;
 		}
 
+		if (doColor && colors.size() != vertices.size())
+		{
+			return Error::NOT_ENOUGH_COLORS;
+		}
+
 		//Translation, scale and rotation:
 		/*
 		glPushMatrix();
@@ -49,7 +54,10 @@ Error Model::render()
 		glBegin(GL_TRIANGLES);
 		for (unsigned int i = 0; i < vertices.size(); i++)
 		{
-			glColor3f(1.f, 1.f, 1.f);
+			if (doColor)
+			{
+				glColor3f(colors[i].x, colors[i].y, colors[i].z);
+			}
 			glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z);
 		}
 		glEnd();
@@ -185,13 +193,14 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 
 	int picPoint = 0;
 
+
+	std::cout << "[objLoader] Starting material parsing (" << mtlPath << ")" << std::endl;
+
 	//First parse materialss:
 	for (int i = 0; i < mtl.size(); i++)
 	{
-		std::cout << mtl.at(i) << std::endl;
 		if (comment == true)
 		{
-			std::cout << "IN COMMENT!" << std::endl;
 			//Wait until line break
 			if (mtl.at(i) == '\n')
 			{
@@ -211,10 +220,8 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 			//material name
 			if (newMtlIn == true)
 			{
-				std::cout << "Going through newMtl..." << std::endl;
 				if (mtl.at(i) == ' ')
 				{
-					std::cout << "Finally got to name!" << std::endl;
 					newMtlIn = false;
 					matNameIn = true;
 					materialName = "";
@@ -226,12 +233,10 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 			//We will store every char until the '\n' (will will not be stored)
 			if (matNameIn == true)
 			{
-				std::cout << "Obtaining name!" << std::endl;
 				if (mtl.at(i) == '\n')
 				{
 					matNameIn = false;
 					inMat = true;
-					std::cout << "Finished getting name: " << materialName << std::endl;
 					continue;
 				}
 				materialName.push_back(mtl.at(i));
@@ -243,14 +248,11 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 			//color!
 			if (inMat)
 			{
-				std::cout << "InMat, searching for Kd" << std::endl;
 				if (mtl.at(i) == 'K' && mtl.at(i+1) == 'd')
 				{
-					std::cout << "Found the color!" << std::endl;
 					inColor = true;
 					inMat = false;
 					i += 2; //Place cursor at start of numbers
-					std::cout << "I NOW: " << mtl.at(i) << std::endl;
 					continue;
 				}
 
@@ -262,12 +264,9 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 			if (inColor)
 			{
 				
-				std::cout << "In Color!" << std::endl;
+				//std::cout << "In Color!" << std::endl;
 				if (mtl.at(i) == ' ')
 				{
-					std::cout << "Found color separation!" << std::endl;
-					std::cout << "MN: " << matNum << std::endl;
-					std::cout << "MB: " << matBuffer << std::endl;
 					matNum++;
 					//Push the number
 
@@ -291,9 +290,6 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 
 				if (mtl.at(i) == '\n')
 				{
-					std::cout << "Found color separation! (END)" << std::endl;
-					std::cout << "MN: " << matNum << std::endl;
-					std::cout << "MB: " << matBuffer << std::endl;
 					matNum++;
 					//Push the number
 
@@ -311,13 +307,9 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 					}
 
 					matBuffer = "";
-
-					std::cout << "Finishing new color!" << std::endl;
 					//Create the material:
 					float r, g, b;
 
-					std::cout << "PR: " << matNum1 << " PG: " << matNum2 <<
-						" PB: " << matNum3 << std::endl;
 
 					try
 					{
@@ -330,29 +322,20 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 						throw(exception);
 						return Error::FATAL_ERROR;
 					}
-					//Clear them:
-
-					std::cout << "Clearing old data!" << std::endl;
-
+					//Clear them:7
 					matNum1 = "";
 					matNum2 = "";
 					matNum3 = "";
 
 					//Create new material:
 
-					std::cout << "Pushing material!" << std::endl;
 
 					materials[materialName] = sf::Vector3f(r, g, b);
 
 					//Clear other stuff
 
-					std::cout << "Finishing clearing" << std::endl;
-
 					materialName = "";
 
-					std::cout << "Finished material thing" << std::endl;
-
-					std::cout << "R: " << r << ", G: " << g << " B: " << b << std::endl;
 
 					//Set it to find another material:
 					inMat = false;
@@ -364,7 +347,6 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 					continue;
 				}
 
-				std::cout << "Adding to buffer: " << mtl.at(i) << std::endl;
 
 				matBuffer += mtl.at(i);
 				
@@ -379,7 +361,6 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 
 			if (mtl.at(i) == 'n')
 			{
-				std::cout << "Starting new material!" << std::endl;
 				newMtlIn = true;
 				continue;
 			}
@@ -389,8 +370,9 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 	}
 
 	//Now actually parse the .obj file
-	//This is simpler!
+	//This is simpler! (Not really)
 
+	std::cout << "[objLoader] Starting object load (" << objPath << ")" << std::endl;
 
 
 	std::vector<sf::Vector3f> verticesIndex = std::vector<sf::Vector3f>();
@@ -422,14 +404,11 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 
 	for (int i = 0; i < obj.size(); i++)
 	{
-		std::cout << obj.at(i);
 		if (comment)
 		{
-			std::cout << "IN COMMENT!" << std::endl;
 
 			if (obj.at(i) == '\n')
 			{
-				std::cout << "Ending comment" << std::endl;
 				comment = false;
 				continue;
 			}
@@ -438,7 +417,6 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 		{
 			if (obj.at(i) == '#')
 			{
-				std::cout << "Starting comment!" << std::endl;
 				comment = true;
 				continue;
 			}
@@ -450,7 +428,6 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 				{
 					if (obj.at(i+1) == 'n')
 					{
-						std::cout << "Starting normal" << std::endl;
 						//New vertex normal
 						//Skip to first number
 						i+=2;
@@ -462,7 +439,6 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 					{
 						if (obj.at(i + 1) == ' ')
 						{
-							std::cout << "Starting vertex" << std::endl;
 							//New vertex 
 							//Skip to first number
 							i++;
@@ -476,7 +452,6 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 				{
 					if (obj.at(i + 1) == ' ')
 					{
-						std::cout << "Starting face" << std::endl;
 						//New (complex) face:
 
 						//Skip to first number
@@ -500,7 +475,6 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 									{
 										materialName = "";
 										//usemtl!
-										std::cout << "Starting mtl" << std::endl;
 										//Skip to material name:
 										i += 6;
 										defining = true;
@@ -519,13 +493,11 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 			{
 				if (identifier == "usemtl")
 				{
-					std::cout << "useMtlDoing" << std::endl;
 					//Find activeMaterial, and stop defining
 					//We just need to travel until we find a [\n]
 
 					if (obj.at(i) == '\n')
 					{
-						std::cout << "FINAL NAME: " << materialName << std::endl;
 						defining = false;
 						continue;
 					}
@@ -556,11 +528,6 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 						vertexBuffer.z = stof(sBuffer);
 
 						outVertices.push_back(vertexBuffer);
-
-						std::cout << "Finished vertex: " << std::endl;
-						std::cout << "X: " << vertexBuffer.x << " Y: " <<
-							vertexBuffer.y << " Z: " << vertexBuffer.z << std::endl;
-						std::cout << "outVertices is now size: " << outVertices.size();
 
 						vertexBuffer = sf::Vector3f();
 						sBuffer = "";
@@ -598,11 +565,6 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 
 						outNormals.push_back(vertexBuffer);
 
-						std::cout << "Finished normal: " << std::endl;
-						std::cout << "X: " << vertexBuffer.x << " Y: " <<
-							vertexBuffer.y << " Z: " << vertexBuffer.z << std::endl;
-						std::cout << "outNormals is now size: " << outNormals.size();
-
 						vertexBuffer = sf::Vector3f();
 						sBuffer = "";
 						point = 0;
@@ -616,32 +578,24 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 				}
 				else if (identifier == "f")
 				{
-					std::cout << "VERTEX SIZE: " << outVertices.size() << std::endl;
-					std::cout << "NORMAL SIZE: " << outNormals.size() << std::endl;
-					std::cout << "DOING FACE!" << std::endl;
 
 					if (obj.at(i) == ' ')
 					{
-						std::cout << "Doing normal of either first or second triplet!" << std::endl;
 						//Finish one of the triplets
 						//and push the data
 
 						//normal (faceIP = 2)
 
-						std::cout << "Inserting normal, normal ID: " << std::stoi(sBuffer) - 1 << std::endl;
-
 						normals.push_back(outNormals[std::stoi(sBuffer) - 1]);
 
 
 						faceIP = 0;
-						//i++;
 						sBuffer = "";
 						continue;
 					}
 
 					if (obj.at(i) == '\n')
 					{
-						std::cout << "Finishing face group!" << std::endl;
 						//normal (faceIP = 2)
 						//Do last triplet and flush
 
@@ -656,8 +610,14 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 						//Push the color three times to make all
 						//added vertices the mtlcolor used!
 
-						colors.push_back(materials[activeMaterial]);
+						//std::cout << "Active color: " << std::endl;
+						//std::cout << "R: " << materials[materialName].x << " G:" <<
+							//materials[materialName].y << " B: " << materials[materialName].z <<
+							//std::endl;
 
+						colors.push_back(materials[materialName]);
+						colors.push_back(materials[materialName]);
+						colors.push_back(materials[materialName]);
 						continue;
 
 					}
@@ -665,7 +625,7 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 					if (obj.at(i) == '/')
 					{
 
-						std::cout << "Doing vertex or UV!" << std::endl;
+
 						if (sBuffer == "")
 						{
 							sBuffer = "1";
@@ -674,41 +634,33 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 
 						if (faceIP == 0)
 						{
-							std::cout << "Inserting vertex, vertex ID: " << std::stoi(sBuffer) - 1 << std::endl;
-							if (std::stoi(sBuffer) - 1 >= outVertices.size())
+							
 							{
-								std::cout << std::stoi(sBuffer) - 1 << " is >= " << outVertices.size()
-									<< std::endl;
 								continue;
 							}
 							vertices.push_back(outVertices[std::stoi(sBuffer) - 1]);
-
-							std::cout << "Inserted vertex: " << std::endl;
-							std::cout << "X: " << outVertices[std::stoi(sBuffer) - 1].x <<
-								" Y: " << outVertices[std::stoi(sBuffer) - 1].y << " Z: " <<
-								outVertices[std::stoi(sBuffer) - 1].z << std::endl;
 
 							//vertex
 						}
 						else if (faceIP == 1)
 						{
-							std::cout << "UV DOING NOTHING!" << std::endl;
+							//std::cout << "UV DOING NOTHING!" << std::endl;
 							//Uvs do nothing for now
 							//uv
 						}
 
-						std::cout << "Done!" << std::endl;
+						//std::cout << "Done!" << std::endl;
 						sBuffer = "";
 						faceIP++;
 						continue;
 
 					}
-					std::cout << "BEFORE sBuffer: " << sBuffer << std::endl;
+					//std::cout << "BEFORE sBuffer: " << sBuffer << std::endl;
 
 
 					sBuffer += obj.at(i);
 
-					std::cout << "AFTER sBuffer: " << sBuffer << std::endl;
+					//std::cout << "AFTER sBuffer: " << sBuffer << std::endl;
 
 					continue;
 
