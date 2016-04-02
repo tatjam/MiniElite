@@ -1,9 +1,11 @@
 #pragma once
-#include "SFML/OpenGL.hpp"
-#include "SFML/Graphics.hpp"
+#include <GL/glew.h>
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include "SFML/Graphics.hpp"
+#include "GLShader.h"
+#include "GLProgram.h"
 
 //A not so simple class for handling models!
 //To be expanded to support shaders!
@@ -20,10 +22,23 @@ enum Error
 	FATAL_ERROR,		 //Error when using std:: or similar
 };
 
+
+enum MixMode
+{
+
+	ADD,
+	MULTIPLY,
+	DIVIDE,
+
+};
+
 class Model
 {
 public:
 	
+	//Shader to use when rendering
+	GLProgram* shader;
+
 	//Do not dare to modify these without use of the helper
 	//functions (Feel free actually)
 	sf::Vector3f position = sf::Vector3f(0, 0, 0);
@@ -67,10 +82,22 @@ public:
 	void setRotation(sf::Vector3f t);
 	void setScale(sf::Vector3f t);
 
+	void loadShader(char* filename, GLbyte** ShaderSource, unsigned long* len);
+
+	//Use this to get vertex positions after rendering
+	GLfloat postMatrix[16];
+
+
+	//Computes a light to renderColor (yeah, CPU shaders, i want to go old style)
+	void doLight(sf::Vector3f location, float itensity, MixMode mode);
+
+
+	void clearColor();
+
 	//Loads a .obj file, returns Error!
 	Error loadFile(std::string objPath, std::string mtlPath);
 
-	Error render();
+	Error render(bool doColor = true);
 
 	Model();
 	~Model();

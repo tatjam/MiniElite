@@ -4,9 +4,20 @@
 
 #define DISABLE_COUT true
 
-Error Model::render()
+
+
+void Model::clearColor()
 {
-	bool doColor = true;
+	rColors.clear();
+}
+
+void Model::doLight(sf::Vector3f location, float intensity, MixMode mode)
+{
+	return;
+}
+
+Error Model::render(bool doColor)
+{
 	if (colors.size() <= 0)
 	{
 		doColor = false;
@@ -28,16 +39,8 @@ Error Model::render()
 			return Error::COLORS_NO_TRIPLET;
 		}
 
-		//Translation, scale and rotation:
-		/*
-		glPushMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glTranslatef(location.x, location.y, location.z);
-		glRotatef(rotation.x, 1, 0, 0);
-		glRotatef(rotation.y, 0, 1, 0);
-		glRotatef(rotation.z, 0, 0, 1);
-		glScalef(scale.x, scale.y, scale.z);*/
-		//Do actual rendering!
+		//Setup shader 
+		//shader->use();
 
 
 		glPushMatrix();
@@ -66,8 +69,15 @@ Error Model::render()
 		glVertex3f(offset.x, offset.y, offset.z);
 		glEnd();
 
+		glGetFloatv(GL_MODELVIEW_MATRIX, postMatrix);
+		
+
+		//Unload ALL shaders
+		glUseProgram(0);
+	
 		glPopMatrix();
 		//Done!
+
 		return Error::SUCCESS;
 	}
 }
@@ -741,7 +751,7 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 
 	if (DISABLE_COUT)
 	{
-		std::cout.setstate(std::ios_base::goodbit);
+		std::cout.clear();
 	}
 
 }
@@ -749,6 +759,7 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 
 Model::Model()
 {
+
 }
 
 

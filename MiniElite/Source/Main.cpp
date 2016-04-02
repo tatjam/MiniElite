@@ -1,11 +1,12 @@
+#include <GL/glew.h>
+#include <iostream>
+#include "Renderer/Model.h"
 #include "SFML/Graphics.hpp"
 #include "SFML/Window.hpp"
-#include "SFML/OpenGL.hpp"
-#include <iostream>
-#include <gl/GLU.h>
-#include "Renderer/Model.h"
+#include "Renderer/GLShader.h"
+#include "Renderer/GLProgram.h"
 
-#define SCALE 6
+#define SCALE 10
 #define SIDE 64
 int main()
 {
@@ -24,7 +25,7 @@ int main()
 	glViewport(0, 0, SIDE, SIDE);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(52.0f, 1.f, 0.1f, 100.f);
+	gluPerspective(53.0f, 1.f, 0.1f, 100.f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
@@ -51,14 +52,48 @@ int main()
 	triangle.addVertex(0, 0, -2);
 	triangle.addVertex(1, 1, -2);*/
 
-	triangle.offset = sf::Vector3f(1.5f, 2.4f, -2.f);
+	triangle.offset = sf::Vector3f(0.f, 0.f, 0.f);
 
 	triangle.loadFile("res/testObj.obj", "res/testObj.mtl");
+
+	
+
+
+	sf::Vector3f lightPosition = { 1.5f, 1.5f, 1.5f };
+
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
+	if (glewInit() != GLEW_OK)
+	{
+		std::cout << "GLEW is not willing to work, the program will now quit." << std::endl;
+		std::cin.get();
+		return 1;
+	}
+
+
+	GLShader vertex = GLShader(GL_VERTEX_SHADER);
+	vertex.loadFromFile("res/shader/testVertex.glsl");
+	vertex.compile();
+
+
+	GLShader fragment = GLShader(GL_FRAGMENT_SHADER);
+	fragment.loadFromFile("res/shader/testFragment.glsl");
+	fragment.compile();
+
+	GLProgram* p = new GLProgram();
+	p->attachShader(vertex);
+	p->attachShader(fragment);
+	p->linkProgram();
+
+	triangle.shader = p;
+
 
 	// Start the game loop
 	while (window.isOpen())
 	{
-
+		triangle.doLight(lightPosition, 1.0f, MixMode::ADD);
 
 		// Process events
 		sf::Event event;
@@ -71,7 +106,7 @@ int main()
 
 		//Camera rotation:
 		//triangle.position.x += 0.0001f;
-		triangle.rotation.y += 0.1f;
+		triangle.rotation.y += 0.02f;
 		//triangle.rotation.z += 0.01f;
 		//triangle.rotation.x += 0.1f;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
@@ -225,7 +260,7 @@ int main()
 		glEnd();
 		*/
 
-
+		triangle.clearColor();
 
 		window.setActive(true);
 
@@ -245,6 +280,9 @@ int main()
 		window.popGLStates();
 
 		angleAdd += 0.01f;
+
+
+
 	}
 	return EXIT_SUCCESS;
 
