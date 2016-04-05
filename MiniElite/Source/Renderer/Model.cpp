@@ -18,6 +18,9 @@ void Model::doLight(sf::Vector3f location, float intensity, MixMode mode)
 
 Error Model::render(bool doColor)
 {
+
+	//Prepare material:
+
 	if (colors.size() <= 0)
 	{
 		doColor = false;
@@ -55,16 +58,11 @@ Error Model::render(bool doColor)
 		glBegin(GL_TRIANGLES);
 		for (unsigned int i = 0; i < vertices.size(); i++)
 		{
-			if (doColor)
-			{
-				glColor3f(colors[i].x, colors[i].y, colors[i].z);
-			}
+			glColor3f(colors[i].x, colors[i].y, colors[i].z);
 			glNormal3f(normals[i].x, normals[i].y, normals[i].z);
 			glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z);
 		}
 		glEnd();
-
-
 
 		//Unload ALL shaders
 		glUseProgram(0);
@@ -145,7 +143,7 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 	{
 		std::cout.setstate(std::ios_base::failbit);
 	}
-
+	
 	std::ifstream t(objPath);
 	if (!t.good())
 	{
@@ -163,11 +161,12 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 	buffer2 << g.rdbuf();
 
 	//buffer now contains our file
-
+	
 	std::string obj = buffer.str();
 
 	std::string mtl = buffer2.str();
 
+	
 	//.Obj file parser starts here
 	//----------------------------------------------
 	// Supported:
@@ -735,19 +734,20 @@ Error Model::loadFile(std::string objPath, std::string mtlPath)
 
 		}
 	}
-
-
-
-	std::cout << "--------------------------------------" << std::endl;
-	std::cout << " File: " << objPath << " was loaded!" << std::endl;
-	std::cout << "--------------------------------------" << std::endl;
-
+	
 
 	if (DISABLE_COUT)
 	{
 		std::cout.clear();
 	}
 
+	std::cout << "--------------------------------------" << std::endl;
+	std::cout << " File: " << objPath << " was loaded!" << std::endl;
+	std::cout << "--------------------------------------" << std::endl;
+
+	return Error::SUCCESS;
+	
+	
 }
 
 

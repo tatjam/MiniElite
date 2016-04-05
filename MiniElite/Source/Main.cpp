@@ -15,6 +15,10 @@ int main()
 	
 	sf::RenderTexture* texture = new sf::RenderTexture();
 
+	window.setFramerateLimit(60);
+
+	sf::Sprite s = sf::Sprite();
+	s.setScale(SCALE, SCALE);
 
 	texture->create(SIDE, SIDE, true);
 
@@ -22,11 +26,12 @@ int main()
 
 	//ENABLING HAS TO GO HERE
 	//-------------------------------------------------
+	
 	glEnable(GL_LIGHTING);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 	glEnable(GL_COLOR_MATERIAL);
 
-	GLfloat light0Position[] = { 20.0, 80.0, 20.0, 15.0 }; // Position
+	GLfloat light0Position[] = { 1, 1, 1, 0}; // Position
 	glLightfv(GL_LIGHT0, GL_POSITION, light0Position);
 
 	glEnable(GL_LIGHT0);
@@ -67,10 +72,21 @@ int main()
 	triangle.addVertex(1, 0, -2);
 	triangle.addVertex(0, 0, -2);
 	triangle.addVertex(1, 1, -2);*/
-
+	
 	triangle.offset = sf::Vector3f(0.f, 0.f, 0.f);
 
-	triangle.loadFile("res/testObj.obj", "res/testObj.mtl");
+	triangle.loadFile("res/ships/viper.obj", "res/ships/viper.mtl");
+	
+	
+	
+	Model test = Model();
+
+	test.loadFile("res/objects/asteroid2.obj", "res/objects/asteroid2.mtl");
+	
+
+	Model a = Model();
+
+	//a.loadFile("res/ships/viper.obj", "res/ships/viper.mtl");
 
 	
 	if (glewInit() != GLEW_OK)
@@ -81,24 +97,13 @@ int main()
 	}
 
 
+	
+	//HUD
+	sf::Texture hudUnderlayTex = sf::Texture();
+	hudUnderlayTex.loadFromFile("res/textures/hud.png");
 
-	/*GLShader vertex = GLShader(GL_VERTEX_SHADER);
-	vertex.loadFromFile("res/shader/testVertex.glsl");
-	vertex.compile();
-
-
-	GLShader fragment = GLShader(GL_FRAGMENT_SHADER);
-	fragment.loadFromFile("res/shader/testFragment.glsl");
-	fragment.compile();
-
-	GLProgram* p = new GLProgram();
-	p->attachShader(vertex);
-	p->attachShader(fragment);
-	p->linkProgram();*/
-
-	triangle.shader = nullptr;
-
-
+	sf::Sprite hudUnderlay = sf::Sprite(hudUnderlayTex);
+	
 	// Start the game loop
 	while (window.isOpen())
 	{
@@ -114,30 +119,32 @@ int main()
 		}
 
 		//Camera rotation:
-		//triangle.position.x += 0.0001f;
-		triangle.rotation.y += 0.02f;
+		//triangle.position.x += 0.001f;
+		//triangle.position.y += 0.001f;
+		//triangle.rotation.y += 0.02f;
 		//triangle.rotation.z += 0.01f;
 		//triangle.rotation.x += 0.1f;
+		
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
 		{
-			xRot -= 0.05f;
+			xRot -= 0.35f;
 		}
 
 		//Hello!
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
 		{
-			xRot += 0.05f;
+			xRot += 0.35f;
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
 		{
-			yRot -= 0.05f;
+			yRot -= 0.35f;
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
 		{
-			yRot += 0.05f;
+			yRot += 0.35f;
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
@@ -154,32 +161,74 @@ int main()
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
 		{
-			zMov += 0.005f;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
+			{
+				zMov += 0.035f;
+			}
+			else
+			{
+				zMov += 0.005f;
+			}
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
 		{
-			zMov -= 0.005f;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
+			{
+				zMov -= 0.035f;
+			}
+			else
+			{
+				zMov -= 0.005f;
+			}
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
 		{
-			xMov -= 0.005f;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
+			{
+				xMov -= 0.035f;
+			}
+			else
+			{
+				xMov -= 0.005f;
+			}
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
 		{
-			xMov += 0.005f;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
+			{
+				xMov += 0.03f;
+			}
+			else
+			{
+				xMov += 0.005f;
+			}
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R))
 		{
-			yMov -= 0.005f;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
+			{
+				yMov -= 0.035f;
+			}
+			else
+			{
+				yMov -= 0.005f;
+			}
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F))
 		{
-			yMov += 0.005f;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
+			{
+				yMov += 0.035f;
+			}
+			else
+			{
+				yMov += 0.005f;
+			}
 		}
 
 		// Clear screen
@@ -192,7 +241,7 @@ int main()
 		glLightfv(GL_LIGHT0, GL_POSITION, light0Position);
 
 		glClear(GL_DEPTH_BUFFER_BIT); //!!!
-		texture->clear(sf::Color::Black);
+		texture->clear(sf::Color(10, 8, 35));
 
 		//GL drawing to texture here
 
@@ -215,61 +264,13 @@ int main()
 
 		triangle.render();
 
-		//Front face
-
-
-		
-		glBegin(GL_POLYGON);
-			glVertex3f(0, 0, -5.f);
-			glVertex3f(1, 0, -5.f);
-			glVertex3f(1, 1, -5.f);
-			glVertex3f(0, 1, -5.f);
-		glEnd();
-
-		//Back face
-		glBegin(GL_POLYGON);
-			glVertex3f(0, 0, -6.f);
-			glVertex3f(1, 0, -6.f);
-			glVertex3f(1, 1, -6.f);
-			glVertex3f(0, 1, -6.f);
-		glEnd();
-
-		//Left face
-		glBegin(GL_POLYGON);
-			glVertex3f(0, 0, -5.f);
-			glVertex3f(0, 0, -6.f);
-			glVertex3f(0, 1, -6.f);
-			glVertex3f(0, 1, -5.f);
-		glEnd();
-
-		//Right face
-		glBegin(GL_POLYGON);
-			glVertex3f(1, 0, -5.f);
-			glVertex3f(1, 0, -6.f);
-			glVertex3f(1, 1, -6.f);
-			glVertex3f(1, 1, -5.f);
-		glEnd();
-
-		//Top face
-		glBegin(GL_POLYGON);
-			glVertex3f(0, 1, -5.f);
-			glVertex3f(1, 1, -5.f);
-			glVertex3f(1, 1, -6.f);
-			glVertex3f(0, 1, -6.f);
-		glEnd();
-
-		//Bottom face
-		glBegin(GL_POLYGON);
-			glVertex3f(0, 0, -5.f);
-			glVertex3f(1, 0, -5.f);
-			glVertex3f(1, 0, -6.f);
-			glVertex3f(0, 0, -6.f);
-		glEnd();
-		
+		test.render();
 
 		window.setActive(true);
 
 		window.pushGLStates();
+		texture->pushGLStates();
+		texture->draw(hudUnderlay);
 
 		texture->display();
 
@@ -277,16 +278,15 @@ int main()
 		// Update the window
 		sf::Texture outTex = texture->getTexture();
 		outTex.setSmooth(false);
-		sf::Sprite s = sf::Sprite(outTex);
-		s.setScale(SCALE, SCALE);
+		s.setTexture(outTex);
 		window.draw(s);
 		window.display();
 
 		window.popGLStates();
-
+		texture->popGLStates();
 		angleAdd += 0.01f;
 
-
+		
 
 	}
 	return EXIT_SUCCESS;

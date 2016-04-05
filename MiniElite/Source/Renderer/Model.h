@@ -36,8 +36,6 @@ class Model
 {
 public:
 	
-	//Shader to use when rendering
-	GLProgram* shader;
 
 	//Do not dare to modify these without use of the helper
 	//functions (Feel free actually)

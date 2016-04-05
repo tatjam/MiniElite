@@ -26,10 +26,10 @@
     <ClInclude Include="Source\Renderer\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Renderer\GLShader.h">
+    <ClInclude Include="Source\Game\Camera\SpaceShipCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Renderer\GLProgram.h">
+    <ClInclude Include="Source\Game\HUD\Label.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
